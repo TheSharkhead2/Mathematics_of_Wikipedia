@@ -1,0 +1,8 @@
+name = "WikipediaStructure"
+uuid = "5af666fe-8005-4f9b-992a-5c7fecf89844"
+authors = ["Theo Rode <theorodester@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
