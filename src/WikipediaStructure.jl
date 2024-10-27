@@ -1,5 +1,7 @@
 module WikipediaStructure
 
-greet() = print("Hello World!")
+include("WikipediaDownload/WikipediaDownload.jl")
+
+using .WikipediaDownload
 
 end # module WikipediaStructure
