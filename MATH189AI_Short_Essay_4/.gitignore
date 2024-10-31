@@ -1,0 +1,14 @@
+main.aux
+main.fdb_latexmk
+main.fls
+main.log
+main.out
+main.synctex.gz
+main.txt
+.wakatime-project
+*.bbl
+*.bcf
+*.blg
+*.run.xml
+jlcode.sty
+
