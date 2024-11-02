@@ -126,7 +126,7 @@
 
 An Exploration of the Structure of Mathematics}
 \subtitle{(As Described by Wikipedia)}
-\author{Theo Rode, Maddie Reeve, Christian Johnson}
+\author{Christian Johnson, Maddie Reeve, Theo Rode }
 
 % \affiliation{Somewhere}
 
@@ -136,29 +136,82 @@ An Exploration of the Structure of Mathematics}
 
 \maketitle
 
-Wikipedia offers a unique look into a large component of human knowledge. In particular, by constructing a network of pages (nodes are pages, edges are links between them) we can gain a structural understanding of the knowledge embedded in Wikipedia. 
-This structure could illuminate topics of particular importance and clusters of similar ideas. For this project, I aim to ask the question: \textbf{does the structure of definitions in mathematics, as descried by a network of Wikipedia pages for these definitions, illuminate latent structure in the field of mathematics?}
-By examining mathematics in this way, we may draw out interesting correlations between subfields of mathematics, and find concepts/definitions/theorems that are particularly central to specific fields or mathematics as a whole. 
-It is common to hear about a particular theorem that is ``fundamental'' in some way, but is that actually the case? This is additionally a unique way of examining connection between subfields in mathematics as we can use our network to measure similarity based on overlapping concepts directly. In particular, it can provide a direct numerical comparison for the similarity between different sub-categories of mathematics. 
+\section{Overview}
+
+Wikipedia offers a unique and unparalleled collection of concepts, definitions, and general information on a broad range of topics. 
+Typically, each Wikipedia page describes a single one of these concepts or definitions while also linking to other related Wikipedia pages. 
+This page structure implicitly gives a natural interpretation of Wikipedia as a network: each page representing a node and edges representing a link between pages. 
+As a link between pages inherently represents a form of similarity between pages, we aim to use network analysis techniques to determine the latent structure of the field of mathematics on Wikipedia, and to quantify the structural relationships between subcategories of math. 
+Specifically, does mathematics---as described by Wikipedia---give rise to a latent network structure that illuminates central ideas, definitions, and theorems within the field, and can we draw further connections between hierarchical subcategories of mathematics?
+By exposing these central relationships in mathematics, we hope to give a better understanding of the interconnectedness of the field. This improved understanding could have influence in the classroom, aiding professors and students in understanding intricate relationships between concepts, but additionally in research, where bringing together related ideas may lead to new innovation. 
+
+In order to investigate this question, we will make significant use of a variety of centrality measures on our network. 
+By analyzing these centrality measures not only on the entire graph, but also the subgraphs constructed by sub-fields of mathematics, we may gain significant insight into important nodes on the network. 
+Additionally, assortativity measures and community detection will allow us to understand the (potential) complex relationships between categories of mathematics, and with the unique hierarchical structure of Wikipedia categories, we may gleam insights into the intersections of separate fields of mathematics. 
+Furthermore, understanding the degree distribution of the entire mathematics network, and the category subgraphs, may allow us to understand how the network is growing, and pull out important distinctions found between subcategories. 
+Through thorough investigation utilizing a wide array of network metrics, we hope to illuminate components of the latent network structure of mathematics on Wikipedia. 
 
 Investigation into the network structure of Wikipedia is not uncommon. Similar to the planned analysis outlined here, Silva et at. investigated the Wikipedia structure for the categories of Mathematics, Biology, Physics, and Medicine \cite{silva2011investigating}. 
-In particular, they aimed to answer the question: how does the network structure change between the four topic areas, and what conclusions can be drawn from these differences? In their paper, they find that Mathematics, Physics, and Medicine all adhere to a power law degree distribution, while Biology does not. They note that this, in addition to the power law distributions having different values of $\gamma$, suggest that the growth of these categories is different. 
-Further, they note that the structure inherent to each group is distinct, with Biology and Medicine sharing a ``high modular pattern,'' while Mathematics is sparse, and Physics has a ``dense core'' \cite{silva2011investigating}. They further compare all of these to the greater Wikipedia network, demonstrating that the inherent structure of these categories is distinct from that of the larger network, giving important pause if using characteristics of the larger Wikipedia network to analyze categories within Wikipedia. 
-Similar to this work, my goal is to analyze structure inherent to a network constructed by Wikipedia pages. Using many of the same metrics and measurement techniques as Silva et al. would likely be incredibly productive in my analysis of particularly the mathematics category. 
-However, distinct from this paper, my goal would be to analyze mathematics specifically, and therefore there will be many more sub-categories of mathematics to analyze separately. This will allow for a more thorough investigation of similarity between categories, where Silva et al. was only considering 4 different categories. 
-In particular, an interesting question is how categories/subfields of mathematics are related, which will involve analysis on the similarity of collections of nodes---this is something that Silva et al. were unable to fully consider due to the limited set of categories \cite{silva2011investigating}. 
+In particular, they aimed to answer the question: how does the network structure change between the four topic areas, and what conclusions can be drawn from these differences? 
+They find significant structural differences between the different topic areas and the larger overall network with regards to degree distribution. Further, they show how certain centrality measures, when examined in the subgraphs versus the entire graph, illuminate nodes which are particularly connective between the different subjects. 
+With their analysis only focuses on four subcategories, we aim to go deeper in our analysis with many more categories. Additionally, using the categories provided by Wikipedia, we may analyze the subcategories in regard to their hierarchy, allowing for a richer understanding of relationships between categories.  
 
-It will be important to examine many forms of centrality measures in order to analyze how certain definitions in particular sub-categories of mathematics are rated in terms of relevance. Further, similar Silva et al. \cite{silva2011investigating}, it will be interesting to examine how these centrality measures change when we move from the centrality measure within sub-categories to the centrality measures on the full network. 
-This can give us a picture on how certain definitions are more important in the context of multiple categories, and therefore act as ``connections'' between categories. In addition to this, in order to examine how well ``grouped'' mathematics is, it will be important to use community detection algorithms. These could be used in order to determine if the self-assigned Wikipedia categories line up with found communities, and/or if certain categories are close enough to be grouped together. 
-Furthermore, as discussed by Newman, community detection allows us to simplify networks into just communities, where we could theoretically use this representation to analyze the similarity between the different sub-categories of mathematics. 
-As for computational needs, I don't expect the size of this dataset to be large enough to be a concern. As there are only \href{https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia}{about 6.5 million} Wikipedia articles, and we are only considering the subset relevant to mathematics, the size of the network will not be overly massive. 
-For procuring the data, Wikipedia has a \href{https://www.mediawiki.org/wiki/API:Main_page}{simple API} that should allow us to retrieve the necessary data easily. 
+Kaptein and Kamps explored how the category structure of Wikipedia can be used for entity ranking \cite{kaptein2013wikipedia}. Their preliminary goal was to explore how leveraging Wikipedia's inherent category and link structures could improve the process of ranking entities directly in response to a search query. They found that using Wikipedia’s category data significantly improved the retrieval results. This motivates a continuation into a look of how the category structure of Wikipedia can reveal information about the structure of the pages. We will use the hierarchical nature of the Wikipedia categories to explore the structure of the Mathematics Wikipedia pages. 
 
-One inherent risk to this project is the possibility that there either isn't enough data on Wikipedia to make conclusions about the structure of mathematics, or the structure simply isn't interesting. However, as Silva et al. found interesting structure in their network \cite{silva2011investigating}, I find it unlikely that this will happen---especially considering the size of Wikipedia has \href{https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia}{almost doubled} since. 
-It is also possible, falling under the same umbrella, that community detection on this network fails to give us insight into sub-topics of mathematics. In which case, this analysis will differ considerably less from Silva et al. However, if successful, this project will give us insight into mathematics more broadly. In particular, for undergraduates studying math especially, it will be valuable to see how many of the concepts applied in classes come together to form a coherent and interconnected field. 
-Hopefully, we also are able to construct a visually appealing visualization that will simply be cool to look at! 
+In further analysis of the structure on Wikipedia, Gabella investigated the influence of culture as seen through the network structure of Wikipedia \cite{gabella2017structures}. In particular, Gabella investigated the network induced by Wikipedia when only considering the first link out of a page. 
+This constructed a graph where each node only had a single outgoing edge, though particularly central graphs could have many incoming edges. It was found that depending the language the articles were written in, and thereby the culture associated with the articles, different nodes stood out as central in the network. 
+In performing the analysis, Gabella investigated three main metrics: the core cycle, the degree distribution, and betweenness centrality. It was found that a majority of nodes in the graph where attracted to a single core cycle in the network, and the smaller cycles represented core concepts in the network. 
+Further, degree distribution was found to model a power law distribution, aligning with the characteristics of other scale-free networks. Finally, betweenness centrality proved useful in analyzing how close a particular node was towards the core cycle, and therefore how central it was to the entire network. 
+We may build on this work by extending this analysis to the rich hierarchical category information, and specifically applying the analysis to mathematics. 
 
+\section{Resources Needed}
+Central to our project is link and category data for mathematics pages on Wikipedia. We plan on collecting this data through a mixture of methods, both utilizing \href{https://dumps.wikimedia.org/}{the frequent data dumps} including all the necessary information about articles we require, as well as utilizing the open-access \href{https://www.mediawiki.org/wiki/API:Main_page}{API} provided to grab article data from Wikipedia. 
+The API allows us to pull hierarchical category data from Wikipedia, and then pull data pertaining specifically to articles within each category. The data dumps will provide us with an alternative source of this data in the event rate limits become an issue (a useful backup). 
+Additionally, when looking at the structure of the links between the pages within mathematics, we will have to filter out some pages, such as the page “Mathematics”, that do not contain any key results or ideas but link to most other pages within the network. 
+We are interested in the connections between concepts/ideas/theorems, so we will filter out the nodes that are not necessary. 
+We expect our graph to be on the order of magnitude of hundreds of thousands of nodes---constrained by the \href{https://en.wikipedia.org/wiki/Wikipedia:Size_of_Wikipedia}{about 6.5 million} total Wikipedia articles---and therefore we believe that our laptops will be sufficient for running further analysis on our graphs. 
+To perform our analysis, we will use the Julia programming language \cite{bezanson2017julia}, alleviating many of the performance concerns with alternatives such as Python, and allowing us to perform many more experiments on our limited hardware.
+We will use the HTTP.jl package to get the data, Graphs.jl \cite{Graphs2021} to create and analyze our graph, and other Julia packages such as LinearAlgebra.jl to complete this project.
 
+\section{Tentative Workplan}
+Our project work plan consists of 3 major stages. The first stage involves gathering our data from the Wikipedia API and then putting this data into a graph for further analysis. 
+After we gather the data, we will compile it into a graph using the Graph.jl package. We aim to complete this stage by November 9th. 
+
+The next stage of our plan is analysis. We will explore the graph we created to see what results we can arrive at. 
+Specifically, we are preliminarily interested in looking at assortativity, centrality measures, and community detection. 
+However, our approach to analysis will be iterative and we will further decide what to focus on/explore based on what seems to be the most interesting. 
+In this stage we will begin to create figures to explore the structure of our graph. We aim to complete this stage by November 20th. 
+
+The final stage of our plan is writing up our results and polishing our figures for a presentable write-up. We will do this ideally by December 6th, but certainly by December 9th, the due date. 
+
+\section{Vision and Contingencies}
+Given the successes of similar research previously conducted our group is optimistic in the final outcome of our project. 
+In a full success scenario in which everything goes perfectly we will have several notable outcomes. 
+Firstly we will have produced a visually rich network of mathematical definitions on Wikipedia. 
+Additionally, our network will be informative allowing viewers to easily identify mathematical subfields and high-centrality nodes. 
+Ideally the visualization for our network would have functionalities such as zooming into specific subfields to examine their internal structure. 
+Another notable outcome for this full success scenario would be revealing non-obvious relationships between mathematical subcategories. 
+This could be identifying clusters, or communities, of topics which had been previously considered conceptually disconnected. 
+
+Unfortunately, things rarely go perfectly as planned and there are some foreseeable challenges that could lead to a partial success scenario. 
+One potential setback is that the community detection algorithms we use may fail to uncover meaningful clusters. 
+This could be due to the inherent sparse nature \cite{silva2011investigating} of the mathematics category of Wikipedia. 
+If these circumstances lead to issues we could pivot our focus to analyzing results from centrality measures. 
+This alternative method would still allow our group to analyze the importance of particular mathematical definitions or theorems. 
+Another potential challenge is difficulties with retrieving complete data through the Wikipedia API. 
+In the case that parts of the dataset are incomplete we could scale the scope of our project down. 
+Narrowing the scope on a better documented subset of the network, such as calculus or algebra, could make analysis of the network more manageable while still providing valuable insights on the structure of mathematics.  
+
+\section{Anticipated Learnings}
+Through this project, our group anticipates learning a wide range of skills which broaden our technical and theoretical knowledge. 
+The implementation of centrality measures and other algorithms on the real world data will provide us with a better understanding of network science methods. 
+This deeper understanding of network science methods such as centrality measures and community detection algorithms is one of the main outcomes from working on this project. 
+Additionally, a technical skill we envision picking up from working on this project is a proficiency in Julia. 
+% Throughout lecture and problem sets we used Python and the NetworkX library however for this project our group plans on using Julia. 
+Julia is a high level programming language \cite{bezanson2017julia} which boasts substantial performance gains over Python, and offers a host of powerful mathematics libraries that would be invaluable in our future mathematics work \cite{arya2022automatic, 10.1145/3511528.3511535, NetworkDynamics.jl-2021, DifferentialEquations.jl-2017, OceananigansJOSS}.
+
+Further, we hope to come out of the project with a deeper understanding of the structure of mathematics. As mathematics students, this increased understanding may aid us in future work and give us a greater appreciation for the field. 
+This may serve as a spark to learn a new concept that is interconnected to ones we already love, or give us reason to explore a topic entirely orthogonal to what we already know. We hope that this new look into mathematics allows us to see more into the inherent beauty of mathematics. 
 
 \newpage 
 \printbibliography

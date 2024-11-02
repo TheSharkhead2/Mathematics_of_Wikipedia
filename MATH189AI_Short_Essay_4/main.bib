@@ -8,3 +8,90 @@
   year={2011},
   publisher={Elsevier}
 }
+@article{kaptein2013wikipedia, title={Exploiting the category structure of Wikipedia for entity ranking}, author={Kaptein, Rianne and Kamps, Jaap}, journal={Artificial Intelligence}, volume={194}, pages={111--129}, year={2013}, publisher={Elsevier} }
+@article{gabella2017structures,
+  title={Structures of Knowledge from Wikipedia Networks},
+  author={Gabella, Maxime},
+  journal={arXiv preprint arXiv:1708.05368},
+  year={2017}
+}
+@article{bezanson2017julia,
+  title={Julia: A fresh approach to numerical computing},
+  author={Bezanson, Jeff and Edelman, Alan and Karpinski, Stefan and Shah, Viral B},
+  journal={SIAM review},
+  volume={59},
+  number={1},
+  pages={65--98},
+  year={2017},
+  publisher={SIAM},
+  url={https://doi.org/10.1137/141000671}
+}
+@misc{Graphs2021,
+  author       = {Fairbanks, James and Besan{\c{c}}on, Mathieu and Simon, Sch{\"o}lly and Hoffiman, J{\'u}lio and Eubank, Nick and Karpinski, Stefan},
+  title        = {JuliaGraphs/Graphs.jl: an optimized graphs package for the Julia programming language},
+  year         = 2021,
+  url = {https://github.com/JuliaGraphs/Graphs.jl/}
+}
+@article{DifferentialEquations.jl-2017,
+ author = {Rackauckas, Christopher and Nie, Qing},
+ doi = {10.5334/jors.151},
+ journal = {The Journal of Open Research Software},
+ keywords = {Applied Mathematics},
+ note = {Exported from https://app.dimensions.ai on 2019/05/05},
+ number = {1},
+ pages = {},
+ title = {DifferentialEquations.jl – A Performant and Feature-Rich Ecosystem for Solving Differential Equations in Julia},
+ url = {https://app.dimensions.ai/details/publication/pub.1085583166 and http://openresearchsoftware.metajnl.com/articles/10.5334/jors.151/galley/245/download/},
+ volume = {5},
+ year = {2017}
+}
+@article{NetworkDynamics.jl-2021,
+	author = {Lindner, Michael and Lincoln, Lucas and Drauschke, Fenja and Koulen, Julia M. and Würfel, Hans and Plietzsch, Anton and Hellmann, Frank},
+	doi = {10.1063/5.0051387},
+	eprint = { https://doi.org/10.1063/5.0051387 },
+	journal = {Chaos: An Interdisciplinary Journal of Nonlinear Science},
+	number = {6},
+	pages = {063133},
+	title = {NetworkDynamics.jl—Composing and simulating complex networks in Julia},
+	url = { https://doi.org/10.1063/5.0051387 },
+	volume = {31},
+	year = {2021}
+}
+@article{arya2022automatic,
+  title={Automatic differentiation of programs with discrete randomness},
+  author={Arya, Gaurav and Schauer, Moritz and Sch{\"a}fer, Frank and Rackauckas, Christopher},
+  journal={Advances in Neural Information Processing Systems},
+  volume={35},
+  pages={10435--10447},
+  year={2022}
+}
+@article{OceananigansJOSS,
+  doi = {10.21105/joss.02018},
+  url = {https://doi.org/10.21105/joss.02018},
+  year = {2020},
+  publisher = {The Open Journal},
+  volume = {5},
+  number = {53},
+  pages = {2018},
+  author = {Ali Ramadhan and Gregory LeClaire Wagner and Chris Hill and Jean-Michel Campin and Valentin Churavy and Tim Besard and Andre Souza and Alan Edelman and Raffaele Ferrari and John Marshall},
+  title = {{Oceananigans.jl: Fast and friendly geophysical fluid dynamics on GPUs}},
+  journal = {Journal of Open Source Software}
+}
+@article{10.1145/3511528.3511535,
+author = {Gowda, Shashi and Ma, Yingbo and Cheli, Alessandro and Gw\'{o}\'{z}zd\'{z}, Maja and Shah, Viral B. and Edelman, Alan and Rackauckas, Christopher},
+title = {High-Performance Symbolic-Numerics via Multiple Dispatch},
+year = {2022},
+issue_date = {September 2021},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {55},
+number = {3},
+issn = {1932-2240},
+url = {https://doi.org/10.1145/3511528.3511535},
+doi = {10.1145/3511528.3511535},
+abstract = {As mathematical computing becomes more democratized in high-level languages, high-performance symbolic-numeric systems are necessary for domain scientists and engineers to get the best performance out of their machine without deep knowledge of code optimization. Naturally, users need different term types either to have different algebraic properties for them, or to use efficient data structures. To this end, we developed Symbolics.jl, an extendable symbolic system which uses dynamic multiple dispatch to change behavior depending on the domain needs. In this work we detail an underlying abstract term interface which allows for speed without sacrificing generality. We show that by formalizing a generic API on actions independent of implementation, we can retroactively add optimized data structures to our system without changing the pre-existing term rewriters. We showcase how this can be used to optimize term construction and give a 113x acceleration on general symbolic transformations. Further, we show that such a generic API allows for complementary term-rewriting implementations. Exploiting this feature, we demonstrate the ability to swap between classical term-rewriting simplifiers and e-graph-based term-rewriting simplifiers. We illustrate how this symbolic system improves numerical computing tasks by showcasing an e-graph ruleset which minimizes the number of CPU cycles during expression evaluation, and demonstrate how it simplifies a real-world reaction-network simulation to halve the runtime. Additionally, we show a reaction-diffusion partial differential equation solver which is able to be automatically converted into symbolic expressions via multiple dispatch tracing, which is subsequently accelerated and parallelized to give a 157x simulation speedup. Together, this presents Symbolics.jl as a next-generation symbolic-numeric computing environment geared towards modeling and simulation.},
+journal = {ACM Commun. Comput. Algebra},
+month = {jan},
+pages = {92–96},
+numpages = {5}
+}
