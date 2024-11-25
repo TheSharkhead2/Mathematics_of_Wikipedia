@@ -18,8 +18,8 @@ function plot_degree_dist(g::AbstractGraph; degfn::Function=degree, bucketSize::
     degreeBuckets = sort(collect(keys(hist))) 
     frequencies = [hist[d] for d in degreeBuckets]
     # Filter out zeros and any degrees <= 0 for log plot
-    valid_indices = (frequencies .> 0) .& (degrees .> 0)
-    plot_degrees = degrees[valid_indices]
+    valid_indices = (frequencies .> 0) .& (degreeBuckets .> 0)
+    plot_degrees = degreeBuckets[valid_indices]
     plot_frequencies = frequencies[valid_indices]
     # Create plot
     p = scatter(plot_degrees, plot_frequencies, 
