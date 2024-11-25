@@ -11,5 +11,14 @@ include("Categories/Categories.jl")
 using .Categories
 export mathematics_fields_categories 
 
+include("DegreeDistributionPlot/DegreeDistributionPlot.jl")
+
+using .DegreeDistributionPlot
+export plot_degree_dist
+
+include("Visualizations/Visualizations.jl")
+
+using .Visualizations
+
 end # module WikipediaStructure
 
