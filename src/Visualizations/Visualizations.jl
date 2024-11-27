@@ -1,4 +1,4 @@
 module Visualizations
-include("CatPlot.jl")
+include("category_visulization.jl")
 
 end # module Visualizations

@@ -12,7 +12,10 @@ using JLD2
 # The data is stored in a JLD2 file, which is a julia specific file format
 
 # Load the data from the JLD2 file
-categories_path = "data/categories.jld2"
-data = JLD2.load(category_path)
-(categories_to_pages, category_to_id, category_graph) = JLD2.load_object(categories_path)
+function main()
+    categories_path = "data/categories.jld2"
+    data = JLD2.load(categories_path)
+    (categories_to_pages, category_to_id, category_graph) = JLD2.load_object(categories_path)
+end # function main
 
+# main() # typical script formatting btw
