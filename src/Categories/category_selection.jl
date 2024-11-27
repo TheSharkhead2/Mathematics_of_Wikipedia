@@ -4,8 +4,18 @@ using SparseArrays
 
 import JLD2
 
-function mathematics_fields_categories(categories_path::String, pages_path::String, depth::Int64)
-    FIELDS_OF_MATHEMATICS::String = "Category:Fields of mathematics"
+"""
+    get_subgraph_with_category_labeling(base_cat, categories_path, pages_path, depth)
+
+Takes in `base_cat` and creates the induced subgraph searching at `depth`
+recursively through the sub-categories of `base_cat`. Will return the induced
+subgraph, the vertex map (where the ith index is the old id for the ith node 
+in the subgraph), and the category labeling of each sub-category of `base_cat`
+to the new vertex ids.
+Note `categories_path` is the path to the large categories graph and
+`pages_path` is the path to the whole graph.
+"""
+function get_subgraph_with_category_labeling(base_cat::String, categories_path::String, pages_path::String, depth::Int64)
 
     (page_to_id, page_to_categories, page_graph) = JLD2.load_object(pages_path)
 
@@ -24,7 +34,7 @@ function mathematics_fields_categories(categories_path::String, pages_path::Stri
     # get "all" mathematics fields and treat them as categories
     field_category_ids = outneighbors(
         category_graph,
-        category_to_id[FIELDS_OF_MATHEMATICS]
+        category_to_id[base_cat]
     )
 
     field_sub_categories = Vector{Vector{Int64}}()
@@ -59,10 +69,30 @@ function mathematics_fields_categories(categories_path::String, pages_path::Stri
         push!(field_pages_by_id, field_page_ids)
     end # for field
 
-    all_pages_nonunique = Vector{Int64}()
+    all_pages_unique_set = Set{Int64}()
 
-    field_pages_by_id
-end # function mathematical_categories
+    for field_pages in field_pages_by_id
+        for page in field_pages
+            push!(all_pages_unique_set, page)
+        end # for page
+    end # for field_pages
+
+    sgraph, vmap = induced_subgraph(page_graph, collect(all_pages_unique_set))
+
+    # convert page ids from original ids to new ids
+    field_pages_new_ids = Vector{Vector{Int64}}()
+    for field_page_ids in field_pages_by_id
+        field_page_new = Vector{Int64}() # new ids
+        for field_page in field_page_ids 
+            # add the new graph id 
+            push!(field_page_new, findall(x->x==field_page, vmap)[1])
+        end # for field_page
+
+        push!(field_pages_new_ids, field_page_new)
+    end # for field_page_ids
+
+    (sgraph, vmap, field_pages_new_ids)
+end # function get_subgraph_with_category_labeling
 
 function recurse_category_graph!(
     sub_categories::Vector{Int64},

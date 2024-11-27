@@ -9,7 +9,7 @@ export pull_page_network, pull_page_network_from_checkpoint
 include("Categories/Categories.jl")
 
 using .Categories
-export mathematics_fields_categories 
+export get_subgraph_with_category_labeling
 
 include("DegreeDistributionPlot/DegreeDistributionPlot.jl")
 
