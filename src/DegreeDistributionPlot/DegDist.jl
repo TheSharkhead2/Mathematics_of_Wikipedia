@@ -1,12 +1,20 @@
 using Graphs
 using Plots
 
+"""
+plot_degree_dist(g, degfn, bucketSize)
+
+Takes in a graph, degreefunction (degree, indegree, or outdegree), and bucketSize
+Plots the degree distribution of the graph on a log-log plot 
+"""
 function plot_degree_dist(g::AbstractGraph; degfn::Function=degree, bucketSize::Int=1)
     # Get the degree histogram using the Graphs degree function
     if degfn == indegree
         degrees = indegree(g)
-    else 
+    elseif degfn == outdegree
         degrees = outdegree(g)
+    else 
+        degrees = degree(g)
     end
     # Count the frequency of each degree
     hist = Dict{Int, Int}()
@@ -24,7 +32,7 @@ function plot_degree_dist(g::AbstractGraph; degfn::Function=degree, bucketSize::
     # Create plot
     p = scatter(plot_degrees, plot_frequencies, 
         title = degfn == indegree ? "In-Degree Distribution" : 
-                degfn == outdegree ? "Out-Degree Distribution" : " ",
+                degfn == outdegree ? "Out-Degree Distribution" : "Degree Distribution",
         xlabel = "Degree", ylabel = "Number of Vertices",
         legend = false, markershape = :circle,
         markersize = 5, markerstrokewidth = 2,
