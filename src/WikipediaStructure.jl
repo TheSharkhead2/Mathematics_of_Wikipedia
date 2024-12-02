@@ -20,5 +20,10 @@ include("Visualizations/Visualizations.jl")
 
 using .Visualizations
 
+include("Community/Community.jl")
+using .Community
+
+export community_detection_in_subgraph
+
 end # module WikipediaStructure
 

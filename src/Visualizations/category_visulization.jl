@@ -1,8 +1,8 @@
 using JLD2
 using Graphs
 using Plots
+import Cairo, Fontconfig
 using GraphPlot, Compose
-using Cairo, Fontconfig
 
 # Currently working on implementing julia script to visualize the categories data
 # The data is stored in a JLD2 file, which is a julia specific file format
