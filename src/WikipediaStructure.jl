@@ -23,7 +23,11 @@ using .Visualizations
 include("Community/Community.jl")
 using .Community
 
+include("Theorems/Theorems.jl")
+using .Theorems
+
 export community_detection_in_subgraph
+export sym_nmf_multiplicative_updates
 
 end # module WikipediaStructure
 

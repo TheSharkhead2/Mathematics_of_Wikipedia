@@ -2,6 +2,8 @@ using Graphs
 using JLD2
 using DataFrames, CSV
 
+using WikipediaStructure.Categories
+
 function graph_id_to_label()
     path_name = "Data/theorems.jld2"
     pages_path = "Data/pages.jld2"
