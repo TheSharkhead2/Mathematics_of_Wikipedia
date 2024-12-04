@@ -1,9 +1,36 @@
 using Graphs
 using LinearAlgebra
+using SparseArrays
+using ProgressMeter
 
 import JLD2
 
 using WikipediaStructure.Categories
+
+# somewhat blatantly taken from: https://raw.githubusercontent.com/jamiehadd/Math189AD-MathematicalDataScienceAndTopicModeling/main/code/sym_mult_ups.py
+function sym_nmf_multiplicative_updates(A, k::Int64; α=1, M=1000)
+    EPSILON_DIVIDE = 1e-6
+    (N, _) = size(A)
+
+    W = rand(N, k)
+    H = rand(k, N)
+
+    progress_bar = Progress(M)
+    for i in 1:M
+        Abar = vcat(A, sqrt(α) .* transpose(W))
+        Wbar = vcat(W, sqrt(α) .* I(k))
+
+        H = H .* ((transpose(Wbar) * Abar) ./ (transpose(Wbar) * Wbar * H .+ EPSILON_DIVIDE))
+
+        W = transpose(H)
+
+        error = norm(A - transpose(H)*H)
+
+        next!(progress_bar; showvalues=[("Error", error)])
+    end # for i
+
+    return transpose(H)
+end # function sym_nmf_multiplicative_updates
 
 function community_detection_in_subgraph(
     pages::String,
@@ -38,6 +65,8 @@ function community_detection_in_subgraph(
         category_to_id[subgraph_parent_category]
     )
 
+    println(length(subgraph_category_labels))
+
     (
         subgraph,
         sg_vmap,
@@ -49,5 +78,5 @@ function community_detection_in_subgraph(
         subgraph_depth
     )    
 
-    return subgraph    
+    return (subgraph, actual_subgraph_categories)
 end # function community_detection_in_subgraph
