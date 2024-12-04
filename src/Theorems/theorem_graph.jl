@@ -2,7 +2,9 @@ using Graphs
 using JLD2
 using DataFrames, CSV
 
-function graph_id_to_label()
+using WikipediaStructure.Categories
+
+function main()
     path_name = "Data/theorems.jld2"
     pages_path = "Data/pages.jld2"
 
@@ -20,10 +22,6 @@ function graph_id_to_label()
     for (new_id, original_id) in enumerate(labels)
         new_id_to_label[new_id] = id_to_label[original_id]
     end
-
-    # max, id = findmax(deg_cent)
-    # new_id_to_label[id]
-
 end
 
 function graph_to_edges_csv(g::AbstractGraph, output_path; id_to_label::Dict=Dict())
@@ -44,6 +42,23 @@ function graph_to_edges_csv(g::AbstractGraph, output_path; id_to_label::Dict=Dic
     CSV.write(output_path, edge_list)
 end
 
+function subgraph_to_edges_csv(base_cat::String, categories_path::String, pages_path::String, output_path::String; depth::Int64=2)
+    (sgraph, vmap, field_pages_new_ids) = get_subgraph_with_category_labeling(base_cat, categories_path, pages_path, depth)
 
+    j = load_object(pages_path)
+
+    # Get original ids to label dictionary from our pages graph
+    id_to_label = Dict{Int64, String}()
+    for x in j[1]
+        id_to_label[x[2]] = x[1]
+    end
+
+    graph_to_edges_csv(sgraph, output_path, id_to_label=id_to_label)
+    # Get new id to label vector for s graph
+    # new_id_to_label = Dict{Int64, String}()
+    # for (new_id, original_id) in enumerate(labels)
+    #     new_id_to_label[new_id] = id_to_label[original_id]
+    # end
+end
 # more to come ... 
 
