@@ -53,12 +53,13 @@ function subgraph_to_edges_csv(base_cat::String, categories_path::String, pages_
         id_to_label[x[2]] = x[1]
     end
 
-    graph_to_edges_csv(sgraph, output_path, id_to_label=id_to_label)
     # Get new id to label vector for s graph
-    # new_id_to_label = Dict{Int64, String}()
-    # for (new_id, original_id) in enumerate(labels)
-    #     new_id_to_label[new_id] = id_to_label[original_id]
-    # end
+    new_id_to_label = Dict{Int64, String}()
+    for (new_id, original_id) in enumerate(vmap)
+        new_id_to_label[new_id] = id_to_label[original_id]
+    end
+    graph_to_edges_csv(sgraph, output_path, id_to_label=new_id_to_label)
+
 end
 # more to come ... 
 

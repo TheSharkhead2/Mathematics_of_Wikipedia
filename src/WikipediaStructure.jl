@@ -23,11 +23,14 @@ using .Visualizations
 include("Community/Community.jl")
 using .Community
 
-include("Theorems/Theorems.jl")
-using .Theorems
-
 export community_detection_in_subgraph
 export sym_nmf_multiplicative_updates
+
+include("Theorems/Theorems.jl")
+
+using .Theorems
+export graph_to_edges_csv
+export subgraph_to_edges_csv
 
 end # module WikipediaStructure
 
