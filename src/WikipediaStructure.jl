@@ -19,6 +19,7 @@ export plot_degree_dist
 include("Visualizations/Visualizations.jl")
 
 using .Visualizations
+export basicvis
 
 include("Community/Community.jl")
 using .Community
