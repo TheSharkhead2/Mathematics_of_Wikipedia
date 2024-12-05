@@ -24,9 +24,10 @@ function sym_nmf_multiplicative_updates(A, k::Int64; α=1, M=1000)
 
         W = transpose(H)
 
-        error = norm(A - transpose(H)*H)
+        # error = norm(A - transpose(H)*H)
 
-        next!(progress_bar; showvalues=[("Error", error)])
+        # next!(progress_bar; showvalues=[("Error", error)])
+        next!(progress_bar)
     end # for i
 
     return transpose(H)
