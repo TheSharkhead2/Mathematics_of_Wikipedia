@@ -11,11 +11,6 @@ include("Categories/Categories.jl")
 using .Categories
 export get_subgraph_with_category_labeling
 
-include("DegreeDistributionPlot/DegreeDistributionPlot.jl")
-
-using .DegreeDistributionPlot
-export plot_degree_dist
-
 include("Visualizations/Visualizations.jl")
 
 using .Visualizations
@@ -27,11 +22,14 @@ using .Community
 export community_detection_in_subgraph
 export sym_nmf_multiplicative_updates
 
-include("Theorems/Theorems.jl")
+include("GraphProcessing/GraphProcessing.jl")
 
-using .Theorems
+using .GraphProcessing
 export graph_to_edges_csv
 export subgraph_to_edges_csv
+export plot_communities
+export plot_degree_dist
+
 
 end # module WikipediaStructure
 
