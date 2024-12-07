@@ -30,6 +30,8 @@ export subgraph_to_edges_csv
 export plot_communities
 export plot_degree_dist
 
+include("LouvainCommunities/LouvainCommunities.jl")
+using .LouvainCommunities
 
 end # module WikipediaStructure
 
