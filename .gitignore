@@ -1,3 +1,6 @@
 data/
 .DS_Store
-test.png
+*.png
+*.gif
+*.mp4
+*.jld2

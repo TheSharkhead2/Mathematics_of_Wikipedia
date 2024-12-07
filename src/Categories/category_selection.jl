@@ -10,8 +10,9 @@ import JLD2
 Takes in `base_cat` and creates the induced subgraph searching at `depth`
 recursively through the sub-categories of `base_cat`. Will return the induced
 subgraph, the vertex map (where the ith index is the old id for the ith node 
-in the subgraph), and the category labeling of each sub-category of `base_cat`
-to the new vertex ids.
+in the subgraph), the category labeling of each sub-category of `base_cat`
+to the new vertex ids, and a vector of the ids for the categories corresponding
+to each of those "sub-categories".
 Note `categories_path` is the path to the large categories graph and
 `pages_path` is the path to the whole graph.
 """
@@ -91,7 +92,7 @@ function get_subgraph_with_category_labeling(base_cat::String, categories_path::
         push!(field_pages_new_ids, field_page_new)
     end # for field_page_ids
 
-    (sgraph, vmap, field_pages_new_ids)
+    (sgraph, vmap, field_pages_new_ids, field_category_ids)
 end # function get_subgraph_with_category_labeling
 
 function recurse_category_graph!(

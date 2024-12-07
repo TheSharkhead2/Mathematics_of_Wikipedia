@@ -20,15 +20,17 @@ include("Visualizations/Visualizations.jl")
 
 using .Visualizations
 export basicvis
+export perform_graph_embedding
 
 include("Community/Community.jl")
 using .Community
 
-include("Theorems/Theorems.jl")
-using .Theorems
-
+export CommunityDetectionResult
 export community_detection_in_subgraph
 export sym_nmf_multiplicative_updates
+
+include("Theorems/Theorems.jl")
+using .Theorems
 
 end # module WikipediaStructure
 
