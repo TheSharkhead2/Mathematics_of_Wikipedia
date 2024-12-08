@@ -10,7 +10,7 @@ Implementing the Louvain algorithm for community detection based on NetworkX's P
 https://networkx.org/documentation/stable/_modules/networkx/algorithms/community/louvain.html#louvain_communities
 """
 
-function louvain_communities(G::AbstractGraph, weight="weight", resolution::Float64=1, threshold::Float64=0.0000001, max_level=None, seed=None)
+function louvain_communities(G::AbstractGraph, resolution::Float64=1, threshold::Float64=0.0000001, max_level=None, seed=None)
     """Find the best partition of a graph using the Louvain Community Detection Algorithm.
 
     Louvain Community Detection Algorithm is a simple method to extract the community
@@ -71,7 +71,7 @@ function louvain_communities(G::AbstractGraph, weight="weight", resolution::Floa
     louvain_partitions
     """
 # to be filled in
-    partitions = louvain_partitions(G, weight = weight,  resolution = resolution, threshold = threshold, seed = seed)
+    partitions = louvain_partitions(G,  resolution = resolution, threshold = threshold, seed = seed)
     
     if max_level !== nothing
         if max_level <= 0
@@ -84,7 +84,7 @@ function louvain_communities(G::AbstractGraph, weight="weight", resolution::Floa
     return final_partition[end]
 end
 
-function louvain_partitions(G::AbstractGraph, weight="weight", resolution::Float64=1, threshold::Float64=0.0000001, seed=None )
+function louvain_partitions(G::AbstractGraph, resolution::Float64=1, threshold::Float64=0.0000001, seed=None )
     """Yields partitions for each level of the Louvain Community Detection Algorithm
 
     Louvain Community Detection Algorithm is a simple method to extract the community
@@ -140,21 +140,39 @@ function louvain_partitions(G::AbstractGraph, weight="weight", resolution::Float
     louvain_communities
     """
 
-    partition = [Set([u]) for u in vertices(G)]
+    partition = [Set(u) for u in vertices(G)]
 
     ## case where graph is empty:
     if isempty(G)
-        return [partition]
+        throw(ArgumentError("Graph is empty."))
     end
 
     ## using julia graphs built in modularity function
-    mod = modularity(G, partition, weight=weight, γ=resolution) 
+    mod = modularity(G, partition, γ=resolution) 
 
     is_directed = G.is_directed()
 
     ### finish this
+    graph = Graph()
+    add_verticies!(graph, nv(G))
+    for e in edges(G)
+        add_edge!(graph, e.src, e.dst) # TODO: Weighted?
+    end
 
-    
+    m = ne(G)
+    partition, inner_partition, improvement = _one_level(graph, m , partition, resolution, is_directed, seed)
+
+   improvement = true 
+   while improvement
+    yield([copy(s) for s in partition])
+    new_mod = modularity(graph, inner_partition, γ=resolution)
+    if new_mod - mod <= threshold
+        return
+    end
+
+    mod = new_mod
+    graph = _gen_graph(graph, inner_partition)
+    partition, inner_partition, improvement = _one_level(graph, m, partition, resolution, is_directed, seed)
 end
 
 
@@ -179,12 +197,106 @@ function _one_level(G::AbstractGraph, m::Int64, partition, resolution=1, is_dire
 
     """
 
+    node2com = Dict(u => i for (i, u) in enumerate(G.nodes()))
+    inner_partition = [Set(u) for u in vertices(G)]
+    if is_directed
+        in_degrees = Dict(v => indegree(G, v) for v in vertices) # TODO: implement for weighted edges
+        out_degrees = Dict(v => outdegree(G, v) for v in vertices)
+
+        Stot_in = collect(values(in_degrees))
+        Stot_out = collect(values(out_degrees))
+            
+        nbrs = Dict()
+        for u in G
+            for v in outneighbors(G, u)
+                if u != v
+                    nbrs[u][v] = get(nbrs[u], v, 0) + 1
+                end
+            end
+
+            for v in inneighbors(G, u)
+                if u != v
+                    nbrs[u][v] = get(nbrs[u], v, 0) + 1
+                end
+            end
+        end
+
+    else
+        degrees = Dict(v => degree(G, v) for v in vertices)
+        Stot= collect(values(degrees))
+
+        nbrs = Dict(u => Set(neighbor(G, u)) for u in vertices(G))
+    end
+
+    rand_nodes = collect(vertices(G))
+    shuffle!(rand_nodes)
+    nb_moves = 1
+    improvement = false    
+    while nb_moves > 0
+        nb_moves = 0
+        for u i in rand_nodes
+            best_mod = 0
+            best_com = node2com[u]
+            weights2com = _neighbor_weights(nbrs[u], node2com)
+            if is_directed
+                in_degrees = in_degrees[u]
+                out_degrees = out_degrees[u]
+                Stot_in[best_com] -= in_degrees
+                Stot_out[best_com] -= out_degrees
+                remove_cost = (
+                    -weights2com[best_com] / m
+                    + resolution
+                    * (out_degree * Stot_in[best_com] + in_degree * Stot_out[best_com])
+                    / m^2
+                )
+            else
+                degree = degrees[u]
+                Stot[best_com] -= degree
+                remove_cost = -weights2com[best_com] / m + resolution * (
+                    Stot[best_com] * degree
+                ) / (2 * m^2)
+
+            end
+        end
+        for nbr_com, wt in weights2com
+            if is_directed
+                gain = (
+                    remove_cost
+                    + wt / m
+                    - resolution
+                    * (
+                        out_degree * Stot_in[nbr_com]
+                        + in_degree * Stot_out[nbr_com]
+                    )
+                    / m^2
+                )
+            else
+                gain = (
+                    remove_cost
+                    + wt / m
+                    - resolution * (Stot[nbr_com] * degree) / (2 * m^2)
+                )
+            end
+
+            if gain > best_mod:
+                best_mod = gain
+                best_com = nbr_com
+            end
+        if is_directed
+            Stot_in[best_com] += in_degree
+            Stot_out[best_com] += out_degree
+        else
+            Stot[best_com] += degree 
+        end
+        if best_com != node2com[u]
+            # com = get(vertices(G)[u], 
+            # TODO: Finish function implementation
 
 end
 
-function _neighbor_weights(nbrs, node2com)
+function _neighbor_weights(nbrs::Dict, node2com::Dict)
     """Calculate weights between node and its neighbor communities.
-
+    
     Parameters
     ----------
     nbrs : dictionary
@@ -193,6 +305,15 @@ function _neighbor_weights(nbrs, node2com)
            Dictionary with all graph's nodes as keys and their community index as value.
 
     """
+    weights = Dict{Int, Float64}()
+    
+    for (nbr, wt) in nbrs
+        com = node2com[nbr]
+        weights[com] = get(weights, com, 0.0)
+    end
+
+    return weights
+
 end
 
 function _gen_graph(G::AbstractGraph, partition)
