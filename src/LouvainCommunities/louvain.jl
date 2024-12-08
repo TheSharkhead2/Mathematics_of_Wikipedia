@@ -318,5 +318,29 @@ end
 
 function _gen_graph(G::AbstractGraph, partition)
     """Generate a new graph based on the partitions of a given graph"""
+    # note: every partition is one node, and the edge weights represent the edges between communties. 
+    # weighted self loops reflect internal edges in communities
 
+    # new graph with one node for each partition
+    n = length(partition) 
+    H = Graph(n) 
+    # TODO: make this code work
+    for i, part in enumerate(partition)
+        nodes = Set()
+        for node in part:
+            node2com[node] = i
+            ## TODO: figure out how to do update and add node
+            nodes.update(G.nodes[node].get("nodes", {node}))
+        end
+        H.add_node(i, nodes=nodes)
+    end
+
+    for node1, node2, wt in G.edges(data=True):
+        wt = wt["weight"]
+        com1 = node2com[node1]
+        com2 = node2com[node2]
+        # temp = H.get_edge_data(com1, com2, {"weight": 0})["weight"] fix
+        # H.add_edge(com1, com2, weight=wt + temp)
+    end
+    return H
 end
