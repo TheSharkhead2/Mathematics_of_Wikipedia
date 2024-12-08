@@ -327,7 +327,7 @@ function _gen_graph(G::AbstractGraph, partition)
     # TODO: make this code work
     for i, part in enumerate(partition)
         nodes = Set()
-        for node in part:
+        for node in part
             node2com[node] = i
             ## TODO: figure out how to do update and add node
             nodes.update(G.nodes[node].get("nodes", {node}))
@@ -343,4 +343,4 @@ function _gen_graph(G::AbstractGraph, partition)
         # H.add_edge(com1, com2, weight=wt + temp)
     end
     return H
-end
+en
