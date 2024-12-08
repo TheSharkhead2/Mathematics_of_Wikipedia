@@ -343,4 +343,4 @@ function _gen_graph(G::AbstractGraph, partition)
         # H.add_edge(com1, com2, weight=wt + temp)
     end
     return H
-en
+end
