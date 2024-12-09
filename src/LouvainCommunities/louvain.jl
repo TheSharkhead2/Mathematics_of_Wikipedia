@@ -1,5 +1,5 @@
 using Graphs
-using StatsBase
+using SimpleWeightedGraphs
 using Random
 using DataStructures
 
@@ -84,7 +84,7 @@ function louvain_communities(G::AbstractGraph, resolution::Float64=1, threshold:
     return final_partition[end]
 end
 
-function louvain_partitions(G::AbstractGraph, resolution::Float64=1, threshold::Float64=0.0000001, seed=None )
+function louvain_partitions(G::AbstractGraph; resolution::Float64=1, threshold::Float64=0.0000001, seed=nothing)
     """Yields partitions for each level of the Louvain Community Detection Algorithm
 
     Louvain Community Detection Algorithm is a simple method to extract the community
@@ -110,9 +110,6 @@ function louvain_partitions(G::AbstractGraph, resolution::Float64=1, threshold::
     Parameters
     ----------
     G : Graph object
-    weight : string or None, optional (default="weight")
-     The name of an edge attribute that holds the numerical value
-     used as a weight. If None then each edge has weight 1.
     resolution : float, optional (default=1)
         If resolution is less than 1, the algorithm favors larger communities.
         Greater than 1 favors smaller communities
@@ -148,11 +145,10 @@ function louvain_partitions(G::AbstractGraph, resolution::Float64=1, threshold::
     end
 
     ## using julia graphs built in modularity function
-    mod = modularity(G, partition, γ=resolution) 
+    mod = modularity(G, partition_to_labels(G,partition), γ=resolution) 
 
-    is_directed = G.is_directed()
+    is_directed = G isa SimpleDiGraph # NOTE: probably might need some other cases here
 
-    ### finish this
     graph = Graph()
     add_verticies!(graph, nv(G))
     for e in edges(G)
@@ -164,19 +160,18 @@ function louvain_partitions(G::AbstractGraph, resolution::Float64=1, threshold::
 
    improvement = true 
    while improvement
-    yield([copy(s) for s in partition])
-    new_mod = modularity(graph, inner_partition, γ=resolution)
-    if new_mod - mod <= threshold
-        return
+        yield([copy(s) for s in partition])
+        new_mod = modularity(graph, partition_to_labels(inner_partition), γ=resolution)
+        if new_mod - mod <= threshold
+            return
+        end
+        mod = new_mod
+        # (graph, inner_partition)
+        # partition, inner_partition, improvement = _one_level(graph, m, partition, resolution, is_directed, seed)
     end
-
-    mod = new_mod
-    graph = _gen_graph(graph, inner_partition)
-    partition, inner_partition, improvement = _one_level(graph, m, partition, resolution, is_directed, seed)
 end
 
-
-function _one_level(G::AbstractGraph, m::Int64, partition, resolution=1, is_directed=False, seed=None)
+function _one_level(G::AbstractGraph, m::Int64, partition; resolution=1, is_directed=false, seed=nothing)
     """Calculate one level of the Louvain partitions tree
 
     Parameters
@@ -194,38 +189,61 @@ function _one_level(G::AbstractGraph, m::Int64, partition, resolution=1, is_dire
     seed : integer, random_state, or None (default)
         Indicator of random number generation state.
         See :ref:`Randomness<randomness>`.
+    weights: a dictionary mapping nodes to their weight
 
     """
+    # convert to weighted graph
+    # don't love iterating over all of the edges...
+    if !(G isa SimpleWeightedDiGraph || G isa SimpleWeightedGraph)
+        if is_directed
+             # Create a weighted copy of G with all weights set to 1 if it isn't weighted
+            weighted_G = SimpleWeightedDiGraph(nv(G))
+            for e in edges(G)
+                add_edge!(weighted_G, src(e), dst(e), 1.0)
+            end
+            G = weighted_G
+        else
+            weighted_G = SimpleWeightedGraph(nv(G))
+            for e in edges(G)
+                add_edge!(weighted_G, src(e), dst(e), 1.0)
+            end
+            G = weighted_G
+        end
+    end 
 
-    node2com = Dict(u => i for (i, u) in enumerate(G.nodes()))
+    
+    node2com = Dict(u => i for (i, u) in enumerate(vertices(G)))
     inner_partition = [Set(u) for u in vertices(G)]
     if is_directed
-        in_degrees = Dict(v => indegree(G, v) for v in vertices) # TODO: implement for weighted edges
-        out_degrees = Dict(v => outdegree(G, v) for v in vertices)
-
+        # sum the weights of all the in and out edges
+        in_degrees = Dict(v => sum(get_weight(G, u, v) for u in inneighbors(G, v)) for v in vertices(G))
+        out_degrees = Dict(v => sum(get_weight(G, u, v) for u in outneighbors(G, v)) for v in vertices(G))
+ 
         Stot_in = collect(values(in_degrees))
         Stot_out = collect(values(out_degrees))
             
         nbrs = Dict()
-        for u in G
+        for u in vertices(G)
+            nbrs[u] = get(nbrs, u, Dict())
             for v in outneighbors(G, u)
                 if u != v
-                    nbrs[u][v] = get(nbrs[u], v, 0) + 1
+                    nbrs[u][v] = get(nbrs[u], v, 0) + get_weight(G,u,v)
                 end
             end
 
             for v in inneighbors(G, u)
                 if u != v
-                    nbrs[u][v] = get(nbrs[u], v, 0) + 1
+                    nbrs[u][v] = get(nbrs[u], v, 0) + get_weight(G,u,v)
                 end
             end
         end
 
     else
-        degrees = Dict(v => degree(G, v) for v in vertices)
-        Stot= collect(values(degrees))
-
-        nbrs = Dict(u => Set(neighbor(G, u)) for u in vertices(G))
+        degrees = Dict(v => sum(get_weight(G, u, v) for u in neighbors(G, v)) for v in vertices(G))
+        Stot = collect(values(degrees))
+        # double dictionary comprehension to u maps to a dictionary with it's neighbors as keys such that 
+        # nbrs[u][v] should be the edge weight for u,v
+        nbrs = Dict(u => Dict(v => get_weight(G, u, v) for v in neighbors(G, u) if u != v) for u in vertices(G))
     end
 
     rand_nodes = collect(vertices(G))
@@ -234,17 +252,17 @@ function _one_level(G::AbstractGraph, m::Int64, partition, resolution=1, is_dire
     improvement = false    
     while nb_moves > 0
         nb_moves = 0
-        for u i in rand_nodes
+        for u in rand_nodes
             best_mod = 0
             best_com = node2com[u]
             weights2com = _neighbor_weights(nbrs[u], node2com)
             if is_directed
-                in_degrees = in_degrees[u]
-                out_degrees = out_degrees[u]
-                Stot_in[best_com] -= in_degrees
-                Stot_out[best_com] -= out_degrees
+                in_degree = in_degrees[u]
+                out_degree = out_degrees[u]
+                Stot_in[best_com] -= in_degree
+                Stot_out[best_com] -= out_degree
                 remove_cost = (
-                    -weights2com[best_com] / m
+                    -get(weights2com, best_com, 0) / m
                     + resolution
                     * (out_degree * Stot_in[best_com] + in_degree * Stot_out[best_com])
                     / m^2
@@ -252,13 +270,12 @@ function _one_level(G::AbstractGraph, m::Int64, partition, resolution=1, is_dire
             else
                 degree = degrees[u]
                 Stot[best_com] -= degree
-                remove_cost = -weights2com[best_com] / m + resolution * (
+                remove_cost = -get(weights2com, best_com, 0) / m + resolution * (
                     Stot[best_com] * degree
                 ) / (2 * m^2)
 
             end
-        end
-        for nbr_com, wt in weights2com
+        for (nbr_com, wt) in weights2com
             if is_directed
                 gain = (
                     remove_cost
@@ -278,20 +295,37 @@ function _one_level(G::AbstractGraph, m::Int64, partition, resolution=1, is_dire
                 )
             end
 
-            if gain > best_mod:
+            if gain > best_mod
                 best_mod = gain
                 best_com = nbr_com
             end
+        end
         if is_directed
             Stot_in[best_com] += in_degree
             Stot_out[best_com] += out_degree
         else
             Stot[best_com] += degree 
         end
-        if best_com != node2com[u]
-            # com = get(vertices(G)[u], 
-            # TODO: Finish function implementation
-
+        if best_com != node2com[u] # best com isn't current com
+            # then we swap
+            com = get(vertices(G), u, Set(u)) # ???
+            # com = G.nodes[u].get("nodes", {u})
+            setdiff!(partition[node2com[u]],(com))
+            pop!(inner_partition[node2com[u]], u)
+            push!(partition[best_com], com)
+            push!(inner_partition[best_com], u) 
+            improvement = true
+            nb_moves += 1
+            node2com[u] = best_com
+        end
+    end
+    end
+    # get rid of empty partitions
+    partition = filter(x -> length(x) > 0, partition)
+    inner_partition = filter(x -> length(x) > 0, inner_partition)
+    # return
+    return partition, inner_partition, improvement
+        
 end
 
 function _neighbor_weights(nbrs::Dict, node2com::Dict)
@@ -309,7 +343,7 @@ function _neighbor_weights(nbrs::Dict, node2com::Dict)
     
     for (nbr, wt) in nbrs
         com = node2com[nbr]
-        weights[com] = get(weights, com, 0.0)
+        weights[com] = get(weights, com, 0.0) + wt
     end
 
     return weights
@@ -323,24 +357,39 @@ function _gen_graph(G::AbstractGraph, partition)
 
     # new graph with one node for each partition
     n = length(partition) 
-    H = Graph(n) 
-    # TODO: make this code work
-    for i, part in enumerate(partition)
-        nodes = Set()
-        for node in part
-            node2com[node] = i
-            ## TODO: figure out how to do update and add node
-            nodes.update(G.nodes[node].get("nodes", {node}))
-        end
-        H.add_node(i, nodes=nodes)
-    end
+    # do we need a directed graph still? if so how do we handle the edges between each 
+    H = SimpleWeightedDiGraph(n) 
+    # TODO: make this code work :)
+    # for (i, part) in enumerate(partition)
+    #     nodes = Set()
+    #     for node in part
+    #         node2com[node] = i
+    #         ## TODO: figure out how to do update and add node
+    #         nodes.update(G.nodes[node].get("nodes", {node}))
+    #     end
+    #     H.add_node(i, nodes=nodes)
+    # end
 
-    for node1, node2, wt in G.edges(data=True):
-        wt = wt["weight"]
-        com1 = node2com[node1]
-        com2 = node2com[node2]
-        # temp = H.get_edge_data(com1, com2, {"weight": 0})["weight"] fix
-        # H.add_edge(com1, com2, weight=wt + temp)
-    end
+    # for node1, node2, wt in G.edges(data=true):
+    #     wt = wt["weight"]
+    #     com1 = node2com[node1]
+    #     com2 = node2com[node2]
+    #     # temp = H.get_edge_data(com1, com2, {"weight": 0})["weight"] fix
+    #     # H.add_edge(com1, com2, weight=wt + temp)
+    # end
     return H
+end
+
+# can make this not take G easily
+function partition_to_labels(G::AbstractGraph, partition)
+    # convert partition into a vector classifying each node
+    labels = zeros(Int, nv(G))
+    current = 1
+    for group in partition
+        for node in group
+            labels[node] = current
+        end
+        current = current+1
+    end
+    return labels
 end
