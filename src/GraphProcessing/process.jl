@@ -1,4 +1,4 @@
-using Graphs, Plots
+using Graphs
 using JLD2
 using DataFrames, CSV
 using SGtSNEpi, Random, Distributions
@@ -50,11 +50,11 @@ plot_degree_dist(g, degfn, bucketSize)
 Takes in a graph, degreefunction (degree, indegree, or outdegree), and bucketSize
 Plots the degree distribution of the graph on a log-log plot 
 """
-function plot_degree_dist(g::AbstractGraph; degfn::Function=degree, bucketSize::Int=1)
+function plot_degree_dist(g::AbstractGraph; type = "degree", bucketSize::Int=1, output_path="")
     # Get the degree histogram using the Graphs degree function
-    if degfn == indegree
+    if type == "indegree"
         degrees = indegree(g)
-    elseif degfn == outdegree
+    elseif type == "outdegree"
         degrees = outdegree(g)
     else 
         degrees = degree(g)
@@ -72,17 +72,34 @@ function plot_degree_dist(g::AbstractGraph; degfn::Function=degree, bucketSize::
     valid_indices = (frequencies .> 0) .& (degreeBuckets .> 0)
     plot_degrees = degreeBuckets[valid_indices]
     plot_frequencies = frequencies[valid_indices]
+    plot_title = type == "indegree" ? "In-Degree Distribution" :
+                 type == "outdegree" ? "Out-Degree Distribution" : "Degree Distribution"
     # Create plot
-    p = Plots.scatter(plot_degrees, plot_frequencies, 
-        title = degfn == indegree ? "In-Degree Distribution" : 
-                degfn == outdegree ? "Out-Degree Distribution" : "Degree Distribution",
-        xlabel = "Degree", ylabel = "Number of Vertices",
-        legend = false, markershape = :circle,
-        markersize = 5, markerstrokewidth = 2,
-        xscale=:log10, yscale=:log10,
-        color = :purple,
+    set_theme!(theme_black())
+    fig = Figure(resolution = (800, 600))
+    ax = Axis(fig[1, 1], 
+        title = plot_title,
+        xlabel = "Degree",
+        ylabel = "Number of Vertices",
+        xscale = log10,
+        yscale = log10,
+        xgridvisible = false,
+        ygridvisible = false,
     )
-    return p
+    scatter!(ax, plot_degrees, plot_frequencies,
+        color = :magenta,
+        markersize = 10,
+        strokewidth = 2,
+        marker = :circle,
+        strokecolor = RGB(1.0, 0.7, 1.0)
+    )
+    # hidedecorations!(ax)  
+    hidespines!(ax) 
+
+    if length(output_path)>0
+        save(output_path, fig)
+    end
+    return fig
 end
 
 

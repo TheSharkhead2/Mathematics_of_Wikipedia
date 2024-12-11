@@ -35,7 +35,6 @@ export plot_degree_dist
 include("LouvainCommunities/LouvainCommunities.jl")
 using .LouvainCommunities
 
-
 include("Centrality/centrality.jl")
 using .Centrality
 export CentralityResult, analyze_category_centralities, load_page_data, load_category_data
