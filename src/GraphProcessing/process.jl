@@ -50,7 +50,7 @@ plot_degree_dist(g, degfn, bucketSize)
 Takes in a graph, degreefunction (degree, indegree, or outdegree), and bucketSize
 Plots the degree distribution of the graph on a log-log plot 
 """
-function plot_degree_dist(g::AbstractGraph; type = "degree", bucketSize::Int=1, output_path="")
+function plot_degree_dist(g::AbstractGraph; type = "degree", bucketSize::Int=1, output_path="", series_color=:magenta)
     # Get the degree histogram using the Graphs degree function
     if type == "indegree"
         degrees = indegree(g)
@@ -87,7 +87,7 @@ function plot_degree_dist(g::AbstractGraph; type = "degree", bucketSize::Int=1, 
         ygridvisible = false,
     )
     scatter!(ax, plot_degrees, plot_frequencies,
-        color = :magenta,
+        color = series_color,
         markersize = 10,
         strokewidth = 2,
         marker = :circle,

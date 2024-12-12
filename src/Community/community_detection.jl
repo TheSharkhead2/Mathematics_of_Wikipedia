@@ -291,3 +291,151 @@ function community_detection_in_subgraph(
         found_communities_pages_ranked_names
     )
 end # function community_detection_in_subgraph
+
+function community_detection_in_subgraph(
+    pages::String,
+    categories::String,
+    subgraph_nodes::Vector{Int64},
+    communities::Union{Int64, Nothing}; 
+    remove_isolated_nodes::Bool = true,
+    centrality_measure = pagerank, # centrality measure to use when ranking nodes
+    community_detection_method = :symnmf, # :symnmf
+    community_detection_max_iter = 1000,
+    graph_embedding_lambda = 100.,
+    graph_embedding_alpha = 10,
+    graph_embedding_eta = 20,
+    graph_embedding_max_iter = 5000,
+    graph_embedding_early_exag = 500,
+    graph_embedding_np = 0,
+    graph_embedding_seed = 42,
+)
+    community_detection_method ∉ [:symnmf] && throw(ArgumentError("Community detection method $community_detection_method not yet supported. Please use one of: [:symnmf]"))
+    (community_detection_method == :symnmf && isnothing(communities)) && throw(ArgumentError("For community detection method $community_detection_method you must specify a number of communities to find."))
+    (community_detection_method == :symnmf && communities <= 0) && throw(ArgumentError("Number of communities to find must be positive. You passed $communities."))
+
+    (
+        page_to_id,
+        page_to_categories,
+        page_graph
+    ) = JLD2.load_object(pages)
+
+    (
+        categories_to_pages,
+        category_to_id,
+        category_graph
+    ) = JLD2.load_object(categories)
+
+    id_to_category = Dict{Int64, String}()
+    for x in category_to_id
+        id_to_category[x[2]] = x[1]
+    end # for x
+
+    id_to_page = Dict{Int64, String}()
+    for x in page_to_id
+        id_to_page[x[2]] = x[1]
+    end # for x
+
+    subgraph, sg_vmap = induced_subgraph(page_graph, subgraph_nodes)
+
+    # remove isolated nodes
+    connected_subgraph_vmap = collect(1:nv(subgraph)) # start with identity vmap
+    if remove_isolated_nodes
+        # get largest connected component 
+        sg_connected_components = connected_components(subgraph)
+        largest_cc_idx = findmax(length.(sg_connected_components))[2]
+
+        connected_subgraph, connected_subgraph_vmap = induced_subgraph(subgraph, sg_connected_components[largest_cc_idx])
+
+        # construct vmap back to original pages graph
+        connected_subgraph_vmap_to_pages = Vector{Int64}()
+        for sg_page_id in connected_subgraph_vmap
+            push!(connected_subgraph_vmap_to_pages, sg_vmap[sg_page_id])
+        end # for sg_page_id
+
+        subgraph = connected_subgraph
+        sg_vmap = connected_subgraph_vmap_to_pages
+    end # if
+
+    # get names for each page
+    subgraph_page_names = Vector{String}()
+    for sg_page_id in 1:nv(subgraph)
+        push!(subgraph_page_names,
+            id_to_page[sg_vmap[sg_page_id]]
+        )
+    end # for sg_page_id
+
+    found_community_labeling = Vector{Int64}()
+    if community_detection_method == :symnmf
+        @info "Running SymNMF community detection..."
+        # run SymNMF for community detection
+        H = sym_nmf_multiplicative_updates(
+            adjacency_matrix(SimpleGraph(subgraph)),
+            communities;
+            M = community_detection_max_iter
+        )
+
+        # find maximum entry in each row (which is the found community for that node)
+        H_max_entries = findmax(H; dims=2)
+
+        # pull out max indices to get labeling
+        found_community_labeling = [
+            H_max_entries[2][i][2] for i in 1:size(H)[1]
+        ]
+    end # if
+
+    # TODO: need to set `communities` for community detection algorithms that don't have defined community count
+
+    # get mapping from found community id to contained pages
+    found_communities_to_node_ids = [Int64[] for _ in 1:communities]
+    for (page_id, page_community_id) in enumerate(found_community_labeling)
+        push!(
+            found_communities_to_node_ids[page_community_id],
+            page_id
+        )
+    end # for (page_id, page_community_id)
+
+    subgraph_centrality = centrality_measure(subgraph)
+ 
+    # sort found community pages by centrality measure
+    found_communities_pages_ranked = [
+        sort(
+            found_communities_to_node_ids[i],
+            by=x->subgraph_centrality[x],
+            rev=true # want highest first
+        ) for i in 1:communities
+    ]
+
+    # turn the ids in ranking into page names 
+    found_communities_pages_ranked_names = [
+        [subgraph_page_names[
+            found_communities_pages_ranked[community_id][i]
+        ] for i in eachindex(found_communities_pages_ranked[community_id])]
+        for community_id in 1:communities
+    ]
+    
+    @info "Performing graph embedding for visualization..."
+    Y = perform_graph_embedding(
+        subgraph;
+        lambda = graph_embedding_lambda,
+        alpha = graph_embedding_alpha,
+        eta = graph_embedding_eta,
+        max_iter = graph_embedding_max_iter,
+        early_exag = graph_embedding_early_exag,
+        np = graph_embedding_np,
+        seed = graph_embedding_seed,
+    )
+
+    return CommunityDetectionResult(
+        subgraph,
+        Y,
+        sg_vmap,
+        subgraph_page_names,
+        Vector{Int64}(),
+        Vector{Int64}(),
+        Vector{String}(),
+        found_community_labeling,
+        Vector{Vector{Int64}}(),
+        found_communities_pages_ranked,
+        found_communities_pages_ranked_names
+    )
+end # function community_detection_in_subgraph
