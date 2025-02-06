@@ -1,6 +1,7 @@
 # The Mathematics of Wikipedia
 This contains the code used to construct and analyze a subgraph of Wikipedia specifically designed to be mathematics-related. 
 The project was a final project for the Network Science class at Harvey Mudd College, additionally involving a presentation and a write-up. 
+The write-up/paper can be found [here](https://drive.google.com/file/d/1F4_9uG8o95gLHDzO3KZceNp_YlU_n0Ct/view?usp=drive_link) and the slides [here](https://drive.google.com/file/d/1UG4iYaE1OjuaK3tMq90vm665bLNqk4hE/view?usp=sharing).
 
 Our full category graph can be found [here](https://drive.google.com/file/d/16Q4bllbuoalgU-tlEzLB4U6xAXjy72tT/view?usp=sharing). This is a directed graph where an edge is formed between a category and its subcategory.
 
